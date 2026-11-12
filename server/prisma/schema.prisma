@@ -1,0 +1,50 @@
+// 博客系统 MVP 数据模型（见 docs/superpowers/specs/2026-11-12-blog-mvp-design.md 第 4 节）
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  posts        Post[]
+  createdAt    DateTime @default(now())
+}
+
+model Post {
+  id        String      @id @default(cuid())
+  author    User        @relation(fields: [authorId], references: [id])
+  authorId  String
+  title     String
+  content   String // Markdown 原文，渲染即用即算
+  status    PostStatus  @default(DRAFT)
+  shares    ShareLink[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([authorId])
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model ShareLink {
+  id           String   @id @default(cuid())
+  post         Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId       String
+  token        String   @unique // 随机 32 字节 hex
+  passwordHash String? // 空 = 免密分享
+  enabled      Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  @@index([postId])
+}

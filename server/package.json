@@ -1,0 +1,41 @@
+{
+  "name": "blog-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "博客系统 MVP 后端（NestJS + Prisma + SQLite）",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node --env-file-if-exists=.env dist/main.js",
+    "start:dev": "tsc-watch -p tsconfig.build.json --onSuccess \"node --env-file-if-exists=.env dist/main.js\"",
+    "test": "vitest run",
+    "prisma:migrate": "prisma migrate dev"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/core": "^11.0.0",
+    "@nestjs/jwt": "^11.0.0",
+    "@nestjs/platform-express": "^11.0.0",
+    "@prisma/client": "^6.0.0",
+    "bcryptjs": "^3.0.2",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "cookie-parser": "^1.4.7",
+    "markdown-it": "^14.1.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@nestjs/testing": "^11.2.9",
+    "@swc/core": "^1.16.22",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.8",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.0.0",
+    "prisma": "^6.0.0",
+    "tsc-watch": "^6.2.1",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.7.0",
+    "unplugin-swc": "^2.0.0",
+    "vitest": "^3.0.0"
+  }
+}
