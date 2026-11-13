@@ -73,10 +73,11 @@ describe('SharesService', () => {
       await expect(service.getPublic(TOKEN, undefined)).rejects.toThrow(NotFoundException);
     });
 
-    it('免密分享：未登录（无 cookie）也可访问，返回渲染 HTML', async () => {
+    it('免密分享：未登录（无 cookie）也可访问，返回 Markdown 原文（渲染移至前端）', async () => {
       prismaMock.shareLink.findUnique.mockResolvedValue(shareMock({}));
       const res = await service.getPublic(TOKEN, undefined);
-      expect(res.post.contentHtml).toContain('<strong>md</strong>');
+      expect(res.post.content).toBe('**md**');
+      expect(res.post).not.toHaveProperty('contentHtml');
       expect(res.hasPassword).toBe(false);
     });
 

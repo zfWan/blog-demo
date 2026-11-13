@@ -28,18 +28,26 @@ async function submit() {
 </script>
 
 <template>
-  <div class="card" style="max-width: 400px; margin: 48px auto">
+  <el-card class="auth-card">
     <h2>登录</h2>
+    <!-- 表单类错误就近展示（DD6），不用 toast -->
     <div v-if="error" class="error-box">{{ error }}</div>
     <form @submit.prevent="submit">
       <label>用户名或邮箱</label>
-      <input v-model="account" autocomplete="username" required />
+      <el-input v-model="account" autocomplete="username" required />
       <label>密码</label>
-      <input v-model="password" type="password" autocomplete="current-password" required />
+      <el-input v-model="password" type="password" autocomplete="current-password" show-password required />
       <div style="margin-top: 16px; display: flex; gap: 12px; align-items: center">
-        <button class="primary" :disabled="loading" type="submit">登录</button>
+        <el-button type="primary" native-type="submit" :loading="loading">登录</el-button>
         <RouterLink to="/register">没有账号？去注册</RouterLink>
       </div>
     </form>
-  </div>
+  </el-card>
 </template>
+
+<style scoped>
+.auth-card {
+  max-width: 400px;
+  margin: 48px auto;
+}
+</style>

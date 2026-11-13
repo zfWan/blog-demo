@@ -1,7 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
-import { renderMarkdown } from '../../lib/markdown';
 import { PrismaService } from '../../prisma.service';
 import { CreateShareDto } from './dto/create-share.dto';
 
@@ -77,7 +76,7 @@ export class SharesService {
 
   /**
    * 公开访问分享：token 不存在/停用 → 404；带密未解锁 → 401 { needPassword }；
-   * 免密或已解锁 → 文章内容（含服务端渲染 HTML）
+   * 免密或已解锁 → 文章内容（渲染移至前端，返回 Markdown 原文）
    */
   async getPublic(token: string, unlockCookieValue: string | undefined) {
     const share = await this.prisma.shareLink.findUnique({
@@ -96,7 +95,7 @@ export class SharesService {
       post: {
         id: share.post.id,
         title: share.post.title,
-        contentHtml: renderMarkdown(share.post.content),
+        content: share.post.content,
         authorUsername: share.post.author.username,
         updatedAt: share.post.updatedAt,
       },

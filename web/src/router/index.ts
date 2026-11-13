@@ -5,6 +5,7 @@ import RegisterView from '../views/RegisterView.vue'
 import PostListView from '../views/PostListView.vue'
 import PostEditView from '../views/PostEditView.vue'
 import PostReadView from '../views/PostReadView.vue'
+import ProfileView from '../views/ProfileView.vue'
 import ShareView from '../views/ShareView.vue'
 
 const router = createRouter({
@@ -17,6 +18,7 @@ const router = createRouter({
     { path: '/posts/new', component: PostEditView },
     { path: '/posts/:id/edit', component: PostEditView },
     { path: '/posts/:id', component: PostReadView },
+    { path: '/profile', component: ProfileView },
   ],
 })
 

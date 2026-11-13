@@ -88,9 +88,11 @@ Check 'bob delete alice post -> 404' $r.Code 404
 $r = Req 'PATCH' "/posts/$draftId" $aliceJar '{"title":"alice-draft-v2"}'
 Check 'alice patch own post -> 200' $r.Code 200
 
-# ---- 5. markdown preview (XSS escaped) ----
-$r = Req 'POST' '/posts/preview' $aliceJar '{"content":"<script>alert(1)</script>"}'
-if ($r.Body -match '&lt;script&gt;') { Check 'preview escapes script tag' 'escaped' 'escaped' } else { Check 'preview escapes script tag' 'not-escaped' 'escaped' }
+# ---- 5. markdown rendering moved to frontend (return raw content, no contentHtml) ----
+$r = Req 'GET' "/posts/$pubId" $aliceJar $null
+$pub = $r.Body | ConvertFrom-Json
+if ("$($pub.content)" -eq '**public** content') { Check 'GET /posts/:id returns raw content' 'raw' 'raw' } else { Check 'GET /posts/:id returns raw content' "$($pub.content)" 'raw' }
+if ($null -eq ($pub.PSObject.Properties['contentHtml'])) { Check 'GET /posts/:id has no contentHtml' 'absent' 'absent' } else { Check 'GET /posts/:id has no contentHtml' 'present' 'absent' }
 
 # ---- 6. share without password ----
 $r = Req 'POST' "/posts/$draftId/shares" $aliceJar '{}'
@@ -99,6 +101,9 @@ $freeToken = $freeShare.token
 Check 'alice create free share -> 201' $r.Code 201
 $r = Req 'GET' "/share/$freeToken" $null $null
 Check 'anon free share -> 200' $r.Code 200
+$shared = $r.Body | ConvertFrom-Json
+if ("$($shared.post.content)" -eq '# draft content') { Check 'share returns raw content' 'raw' 'raw' } else { Check 'share returns raw content' "$($shared.post.content)" 'raw' }
+if ($null -eq ($shared.post.PSObject.Properties['contentHtml'])) { Check 'share has no contentHtml' 'absent' 'absent' } else { Check 'share has no contentHtml' 'present' 'absent' }
 $r = Req 'GET' "/posts/$draftId/shares" $bobJar $null
 Check 'bob list alice shares -> 404' $r.Code 404
 $r = Req 'PATCH' "/shares/$($freeShare.id)" $bobJar '{"enabled":false}'

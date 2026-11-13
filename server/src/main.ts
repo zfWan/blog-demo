@@ -18,7 +18,8 @@ function mountWebDist(app: INestApplication) {
   app.use(express.static(distDir, { index: 'index.html' }));
   app.use((req: Request, res: Response, next: NextFunction) => {
     if (req.method === 'GET' && !req.path.startsWith('/api')) {
-      res.sendFile(indexHtml);
+      // express 5.2.x 对绝对路径 sendFile 会 404，改用 root + 相对路径
+      res.sendFile('index.html', { root: distDir });
       return;
     }
     next();
