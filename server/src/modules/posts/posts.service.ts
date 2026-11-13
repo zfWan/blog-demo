@@ -1,5 +1,4 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { renderMarkdown } from '../../lib/markdown';
 import { PrismaService } from '../../prisma.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -26,7 +25,7 @@ export class PostsService {
     });
   }
 
-  /** 详情：他人草稿按 404 处理（不泄露存在性）；返回服务端渲染的 contentHtml */
+  /** 详情：他人草稿按 404 处理（不泄露存在性）；渲染移至前端，返回 Markdown 原文 */
   async get(postId: string, viewerId: string) {
     const post = await this.prisma.post.findUnique({
       where: { id: postId },
@@ -35,7 +34,7 @@ export class PostsService {
     if (!post || (post.status === 'DRAFT' && post.authorId !== viewerId)) {
       throw new NotFoundException('文章不存在');
     }
-    return { ...post, contentHtml: renderMarkdown(post.content) };
+    return post;
   }
 
   create(authorId: string, dto: CreatePostDto) {

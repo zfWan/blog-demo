@@ -54,10 +54,11 @@ describe('PostsService 权限规则', () => {
     await expect(service.get('p1', AUTHOR)).rejects.toThrow(NotFoundException);
   });
 
-  it('详情：自己草稿可见，且返回渲染后的 contentHtml', async () => {
+  it('详情：自己草稿可见，且返回 Markdown 原文（渲染移至前端）', async () => {
     prismaMock.post.findUnique.mockResolvedValue(post({ status: 'DRAFT', authorId: AUTHOR }));
     const result = await service.get('p1', AUTHOR);
-    expect(result.contentHtml).toContain('<h1>');
+    expect(result.content).toBe('# hi');
+    expect(result).not.toHaveProperty('contentHtml');
   });
 
   it('详情：不存在 → 404', async () => {

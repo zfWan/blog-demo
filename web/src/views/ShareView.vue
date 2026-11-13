@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { api, errMsg } from '../api'
+import MarkdownContent from '../components/MarkdownContent.vue'
 
 interface SharedPost {
   id: string
   title: string
-  contentHtml: string
+  content: string
   authorUsername: string
   updatedAt: string
 }
@@ -17,10 +19,12 @@ const needPassword = ref(false)
 const password = ref('')
 const error = ref('')
 const lockedMsg = ref('')
+const loaded = ref(false)
 
 async function load(token: string) {
   post.value = null
   needPassword.value = false
+  loaded.value = false
   error.value = ''
   try {
     post.value = (
@@ -35,6 +39,8 @@ async function load(token: string) {
     } else {
       error.value = errMsg(e)
     }
+  } finally {
+    loaded.value = true
   }
 }
 
@@ -44,6 +50,7 @@ async function unlock() {
   try {
     await api.post(`/share/${token}/unlock`, { password: password.value })
     await load(token)
+    ElMessage.success('已解锁')
   } catch (e) {
     error.value = errMsg(e)
   }
@@ -67,14 +74,18 @@ watch(
     <div v-if="error" class="error-box">{{ error }}</div>
     <form @submit.prevent="unlock">
       <label>分享密码</label>
-      <input v-model="password" type="password" autofocus required />
+      <el-input v-model="password" type="password" show-password autofocus required />
       <div style="margin-top: 16px">
-        <button class="primary" type="submit">解锁查看</button>
+        <el-button type="primary" native-type="submit">解锁查看</el-button>
       </div>
     </form>
   </div>
 
   <div v-else-if="error" class="error-box">{{ error }}</div>
+
+  <el-card v-else-if="!loaded">
+    <el-skeleton :rows="6" animated />
+  </el-card>
 
   <template v-else-if="post">
     <div class="card">
@@ -83,8 +94,9 @@ watch(
         作者 {{ post.authorUsername }} · 更新于 {{ fmt(post.updatedAt) }} · 通过分享链接访问
       </div>
     </div>
-    <!-- 服务端 markdown-it(html:false) 渲染结果 -->
-    <div class="card article-md" v-html="post.contentHtml"></div>
+    <!-- 前端统一渲染（DD5）：消费接口返回的 content 原文 -->
+    <el-card>
+      <MarkdownContent :source="post.content" />
+    </el-card>
   </template>
-  <p v-else class="meta">加载中…</p>
 </template>
